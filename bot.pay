@@ -1,0 +1,55 @@
+import os
+import logging
+import feedparser
+from telegram import Update
+from telegram.ext import (
+    Application,
+    CommandHandler,
+    ContextTypes
+)
+
+TOKEN = os.getenv("BOT_TOKEN")
+ADMIN_ID = os.getenv("ADMIN_ID")
+CHANNEL = os.getenv("CHANNEL_ID")
+
+RSS_FEEDS = [
+    "https://www.reuters.com/rssFeed/worldNews",
+    "https://feeds.bbci.co.uk/news/world/rss.xml"
+]
+
+logging.basicConfig(level=logging.INFO)
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(
+        "🌐 به ربات خبری نبض جهان خوش آمدید.\n"
+        "برای دریافت اخبار دستور /news را بفرستید."
+    )
+
+async def news(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("🔎 در حال جمع‌آوری اخبار...")
+
+    for url in RSS_FEEDS:
+        feed = feedparser.parse(url)
+
+        for item in feed.entries[:3]:
+            title = item.get("title", "بدون عنوان")
+            link = item.get("link", "")
+
+            message = (
+                f"🌐 نبض جهان\n\n"
+                f"📰 {title}\n\n"
+                f"🔗 منبع: {link}"
+            )
+
+            await update.message.reply_text(message)
+
+def main():
+    app = Application.builder().token(TOKEN).build()
+
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("news", news))
+
+    app.run_polling()
+
+if __name__ == "__main__":
+    main()
