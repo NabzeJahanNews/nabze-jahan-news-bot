@@ -46,7 +46,9 @@ def main():
                 send_message(message)
                 time.sleep(2)
             except Exception as error:
-                print("Error:", error)
-
+                 print("Error:", error)
+                if hasattr(error, "read"):
+                 print("Details:", error.read().decode("utf-8"))
+                    
 if __name__ == "__main__":
     main()
