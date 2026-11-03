@@ -24,8 +24,12 @@ def send_message(text):
 
     request = urllib.request.Request(url, data=data)
 
+    try:
     with urllib.request.urlopen(request, timeout=20) as response:
         return response.read()
+except urllib.error.HTTPError as e:
+    print("TELEGRAM RESPONSE:", e.read().decode("utf-8"))
+    raise
 
 def main():
     for source in SOURCES:
